@@ -29,7 +29,7 @@ http {
 
     server {
         listen       8000;
-        server_name  https://follme-gateway-api-l4wl.onrender.com;
+        server_name  ${GATEWAY_SERVER_NAME};
 
         #access_log  logs/host.access.log  main;
         proxy_ssl_server_name on;
@@ -43,7 +43,7 @@ http {
         #Authentication
         location = /authentication {
           internal;
-          proxy_pass https://follme-main-service.onrender.com/api/auth/is-logged-in;
+          proxy_pass ${MAIN_SERVICE_URL}/api/auth/is-logged-in;
           proxy_pass_request_body off;
           proxy_pass_request_headers off;
           proxy_set_header Content-Length "";
@@ -52,7 +52,7 @@ http {
 
         # Websocket service
         location /comment-svc/ws {
-          proxy_pass https://follme-comment-service-p08x.onrender.com;
+          proxy_pass ${COMMENT_SERVICE_URL};
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection "upgrade";
@@ -64,7 +64,7 @@ http {
             rewrite ^(.*) $1.proteced;
           }
 
-          proxy_pass https://follme-comment-service-p08x.onrender.com;
+          proxy_pass ${COMMENT_SERVICE_URL};
         }
 
         # Protected Satellite service
@@ -72,19 +72,19 @@ http {
           auth_request /authentication;
           auth_request_set $auth_user $upstream_http_x_user_info;
           rewrite ^(.*).proteced $1 break;
-          proxy_pass https://follme-comment-service-p08x.onrender.com;
+          proxy_pass ${COMMENT_SERVICE_URL};
           proxy_set_header X-User-Info $auth_user;
           internal;
         }
 
         # Satellite service
         location /comment-svc/api {
-          proxy_pass https://follme-comment-service-p08x.onrender.com;
+          proxy_pass ${COMMENT_SERVICE_URL};
         }
 
         # Main service
         location / {
-          proxy_pass https://follme-main-service.onrender.com;
+          proxy_pass ${MAIN_SERVICE_URL};
         }
 
         #error_page  404              /404.html;
